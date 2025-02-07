@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CipherProps } from "@/types/cipherTypes";
-import { alphabet, sanitizeInput } from "@/utils/cipherUtils";
+import { alphabet } from "@/utils/cipherUtils";
 
 export function MonoalphabeticCipher({ title }: CipherProps) {
   const [input, setInput] = useState("");

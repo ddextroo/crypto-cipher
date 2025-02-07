@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CipherProps } from "@/types/cipherTypes";
-import { sanitizeInput, alphabet, mod } from "@/utils/cipherUtils";
+import { alphabet, mod } from "@/utils/cipherUtils";
 
 export function CaesarCipher({ title }: CipherProps) {
   const [input, setInput] = useState("");
