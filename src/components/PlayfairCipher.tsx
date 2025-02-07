@@ -1,23 +1,41 @@
-"use client";
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CipherProps } from "@/types/cipherTypes";
-import { sanitizeInput } from "@/utils/cipherUtils";
 
 export function PlayfairCipher({ title }: CipherProps) {
   const [input, setInput] = useState("");
-  const [key, setKey] = useState("PLAYFAIREXAMPLE");
+  const [key, setKey] = useState("KEYWORD");
   const [output, setOutput] = useState("");
 
   const generateMatrix = (key: string) => {
-    const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-    const uniqueChars = Array.from(new Set(key + alphabet));
+    // Process key: uppercase, replace J with I, remove non-letters
+    const processedKey = key
+      .toUpperCase()
+      .replace(/J/g, "I")
+      .replace(/[^A-Z]/g, "");
+
+    // Remove duplicate letters while preserving order
+    const keyChars: string[] = [];
+    const seen = new Set<string>();
+    for (const char of processedKey) {
+      if (!seen.has(char)) {
+        keyChars.push(char);
+        seen.add(char);
+      }
+    }
+
+    // Get remaining alphabet letters (without J)
+    const remainingAlphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+      .split("")
+      .filter((c) => !seen.has(c));
+
+    // Combine to create 5x5 matrix
+    const matrixChars = [...keyChars, ...remainingAlphabet];
     const matrix: string[][] = [];
     for (let i = 0; i < 5; i++) {
-      matrix.push(uniqueChars.slice(i * 5, (i + 1) * 5));
+      matrix.push(matrixChars.slice(i * 5, (i + 1) * 5));
     }
     return matrix;
   };
@@ -34,19 +52,30 @@ export function PlayfairCipher({ title }: CipherProps) {
   };
 
   const handleEncrypt = () => {
-    const sanitized = sanitizeInput(input).replace(/J/g, "I");
-    const matrix = generateMatrix(sanitizeInput(key));
+    // Process input: uppercase, replace J with I, remove non-letters
+    const sanitized = input
+      .toUpperCase()
+      .replace(/J/g, "I")
+      .replace(/[^A-Z]/g, "");
+
+    // Prepare plaintext with X padding for duplicates and odd length
+    let prepared = "";
+    for (let i = 0; i < sanitized.length; i++) {
+      prepared += sanitized[i];
+      if (i + 1 < sanitized.length) {
+        if (sanitized[i] === sanitized[i + 1]) {
+          prepared += "X";
+        }
+      }
+    }
+    if (prepared.length % 2 !== 0) prepared += "X";
+
+    const matrix = generateMatrix(key);
     let result = "";
 
-    for (let i = 0; i < sanitized.length; i += 2) {
-      const a = sanitized[i];
-      let b = sanitized[i + 1] || "X";
-
-      if (a === b) {
-        b = "X";
-        i--;
-      }
-
+    for (let i = 0; i < prepared.length; i += 2) {
+      const a = prepared[i];
+      const b = prepared[i + 1];
       const [aRow, aCol] = findPosition(matrix, a);
       const [bRow, bCol] = findPosition(matrix, b);
 
@@ -62,32 +91,31 @@ export function PlayfairCipher({ title }: CipherProps) {
     setOutput(result);
   };
 
+  // Decrypt function (reverse the operations)
   const handleDecrypt = () => {
-    const sanitized = sanitizeInput(input);
-    const matrix = generateMatrix(sanitizeInput(key));
+    const sanitized = input.toUpperCase().replace(/J/g, "I");
+    const matrix = generateMatrix(key);
     let result = "";
 
     for (let i = 0; i < sanitized.length; i += 2) {
       const a = sanitized[i];
       const b = sanitized[i + 1];
-
       const [aRow, aCol] = findPosition(matrix, a);
       const [bRow, bCol] = findPosition(matrix, b);
 
       if (aRow === bRow) {
-        result +=
-          matrix[aRow][(aCol - 1 + 5) % 5] + matrix[bRow][(bCol - 1 + 5) % 5];
+        result += matrix[aRow][(aCol + 4) % 5] + matrix[bRow][(bCol + 4) % 5];
       } else if (aCol === bCol) {
-        result +=
-          matrix[(aRow - 1 + 5) % 5][aCol] + matrix[(bRow - 1 + 5) % 5][bCol];
+        result += matrix[(aRow + 4) % 5][aCol] + matrix[(bRow + 4) % 5][bCol];
       } else {
         result += matrix[aRow][bCol] + matrix[bRow][aCol];
       }
     }
 
+    // Remove padding X's (optional)
+    // setOutput(result.replace(/X$/, "").replace(/(.)X\1/g, "$1$1"));
     setOutput(result);
   };
-
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-gray-100">{title}</h2>

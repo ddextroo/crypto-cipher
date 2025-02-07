@@ -13,24 +13,36 @@ export function CaesarCipher({ title }: CipherProps) {
   const [output, setOutput] = useState("");
 
   const handleEncrypt = () => {
-    const sanitized = sanitizeInput(input);
-    const result = sanitized
+    const result = input
       .split("")
       .map((char) => {
-        const index = alphabet.indexOf(char);
-        return alphabet[mod(index + shift, 26)];
+        if (/^[A-Z]$/.test(char)) {
+          const index = alphabet.indexOf(char);
+          return alphabet[mod(index + shift, 26)];
+        } else if (/^[a-z]$/.test(char)) {
+          const index = alphabet.indexOf(char.toUpperCase());
+          return alphabet[mod(index + shift, 26)].toLowerCase();
+        } else {
+          return char;
+        }
       })
       .join("");
     setOutput(result);
   };
 
   const handleDecrypt = () => {
-    const sanitized = sanitizeInput(input);
-    const result = sanitized
+    const result = input
       .split("")
       .map((char) => {
-        const index = alphabet.indexOf(char);
-        return alphabet[mod(index - shift, 26)];
+        if (/^[A-Z]$/.test(char)) {
+          const index = alphabet.indexOf(char);
+          return alphabet[mod(index - shift, 26)];
+        } else if (/^[a-z]$/.test(char)) {
+          const index = alphabet.indexOf(char.toUpperCase());
+          return alphabet[mod(index - shift, 26)].toLowerCase();
+        } else {
+          return char;
+        }
       })
       .join("");
     setOutput(result);

@@ -18,24 +18,42 @@ export function MonoalphabeticCipher({ title }: CipherProps) {
   const [output, setOutput] = useState("");
 
   const handleEncrypt = () => {
-    const sanitized = sanitizeInput(input);
-    const result = sanitized
+    const result = input
       .split("")
       .map((char) => {
-        const index = alphabet.indexOf(char);
-        return key[index];
+        // Handle uppercase
+        if (/^[A-Z]$/.test(char)) {
+          const index = alphabet.indexOf(char);
+          return key[index];
+        }
+        // Handle lowercase
+        if (/^[a-z]$/.test(char)) {
+          const index = alphabet.indexOf(char.toUpperCase());
+          return key[index].toLowerCase();
+        }
+        // Return non-alphabetic characters unchanged
+        return char;
       })
       .join("");
     setOutput(result);
   };
 
   const handleDecrypt = () => {
-    const sanitized = sanitizeInput(input);
-    const result = sanitized
+    const result = input
       .split("")
       .map((char) => {
-        const index = key.indexOf(char);
-        return alphabet[index];
+        // Handle uppercase
+        if (/^[A-Z]$/.test(char)) {
+          const index = key.indexOf(char);
+          return alphabet[index];
+        }
+        // Handle lowercase
+        if (/^[a-z]$/.test(char)) {
+          const index = key.indexOf(char.toUpperCase());
+          return alphabet[index].toLowerCase();
+        }
+        // Return non-alphabetic characters unchanged
+        return char;
       })
       .join("");
     setOutput(result);
