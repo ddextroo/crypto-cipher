@@ -21,6 +21,9 @@ function App() {
           </div>
         </div>
       </div>
+      <div className="flex w-full justify-center mt-5">
+        <div className="text-gray-500 text-lg">Dexter G. Inguito</div>
+      </div>
     </div>
   );
 }
